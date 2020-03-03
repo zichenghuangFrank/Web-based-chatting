@@ -11,8 +11,10 @@ app.get('/', function(req, res) {
 
 
 io.on('connection', function(socket){
-    socket.on('chat message', function (msg) {
-        io.emit('chat message', msg);
+    // Server receives the new chat message and handle from clients
+    socket.on('chat message', function (data) {
+        io.emit('chat message', data);
+        let timestamp = Date.now();
     });
     socket.on('disconnect', function () {
        console.log('user disconnected');

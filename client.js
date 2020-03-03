@@ -6,7 +6,7 @@ $(function () {
         $('#msg-send').val('');
         return false;
     });
-    socket.on('chat message', function(msg){
-        $('#chat-history').append($('<li>').text(msg));
+    socket.on('chat message', function(data){
+        $('#chat-history').append($('<li>').text(data));
     });
 });
