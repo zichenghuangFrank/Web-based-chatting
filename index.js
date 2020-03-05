@@ -19,17 +19,37 @@ io.on('connection', function(socket){
 
     var newUser = {};
 
-    socket.on('') {
+    socket.on('user connect', function(userName, userColor) {
+        if(!userName) {
+            let randomColor = "#" + Math.floor(Math.random()*16777215).toString(16); 
+            newUser.userColor = randomColor;
+            totalUserNumber += 1;
+            let nickName = "No." + totalUserNumber.toString() + " user";
+            newUser.userName = nickName;
+        } else {
+            newUser.userColor = userColor;
+            newUser.userName = userName; 
+        }
+        
+        newUser.id = socket.id;
+        usersOnline.push(newUser);
+        usersAll.push(newUser);
 
-    }
+        socket.emit('send nickname', {userName: newUser.userName, userColor: newUser.userColor});
+        io.emit('update online list', usersOnline);
+    }); 
 
     // Server receives the new chat message and handle from clients
     socket.on('chat message', function (data) {
         let timestamp = Date.now(); // Add current time stamps
+        let userIndex = findOnlineUserByName(data.userName);
+        let userName  = usersOnline[userIndex];
+
+        // Check if the command is /nick or /nickcolor 
+        let commandMessage = data.msg.split(' ');
         
-        
-        
-        io.emit('chat message', {time: timestamp, msg: data.msg});
+
+        io.emit('chat message', {time: timestamp, userName: userName, msg: data.msg});
         
     });
 
