@@ -13,7 +13,6 @@
         socket.emit('user connect', curName, curColor, function (data) {
             $.cookie("userName", data.name);
             $.cookie("userColor", data.color);
-            console.log(data);
         });
     });
 
@@ -22,7 +21,7 @@
         $.cookie("userName", data.userName);
         $.cookie("userColor", data.userColor);
         nickname = data.userName;
-        $('#user-name')[0].innerHTML = "You are " + "<a style='color: " + data.userColor + "'>" + data.userName + "</a>";
+        $('#user-name')[0].innerHTML = "You are " + "<span style='color: " + data.userColor + "'>" + data.userName + "</span>";
     });
 
     // Update the online list
@@ -41,14 +40,53 @@
         return false;
     });
 
+    // Send chat history content
+    socket.on('send chat history', function(data) {
+        $chatH.empty();
+        for (let i = 0; i < data.length; i++) {
+            console.log(data);
+            let date = new Date(data.time);
+            let date_format = date.toTimeString().split(" ");
+            $chatH.prepend("<li>" + date_format[0] + "<span style='color: " + data[i].userColor + "'>" + data[i].userName + "</span>" + ": " + data[i].msg + "</li>");
+        }
+    });
+
+    // Update chat content into chat history
+    socket.on('update chat history', function(data) {
+        $chatH.empty();
+        for (let i = 0; i < data.length; i++) {
+            console.log(data);
+            let date = new Date(data.time);
+            let date_format = date.toTimeString().split(" ");
+
+            // Bold the own message
+            if (data[i].userName === nickname) {
+                $chatH.prepend("<li>" + date_format[0] + "<span style='color: " + data[i].userColor + "';font-weight:bold>" + data[i].userName + "</span>" + ": " + data[i].msg + "</li>");
+            } else {
+                $chatH.prepend("<li>" + date_format[0] + "<span style='color: " + data[i].userColor + "'>" + data[i].userName + "</span>" + ": " + data[i].msg + "</li>");
+            }
+        }
+    });
+
+    // Show command message
+    socket.on('show command message', function(data){
+        console.log(data);
+        let date = new Date(data.time);
+        let date_format = date.toTimeString().split(" ");
+        $chatH.prepend($('<li>').text(date_format[0] + ' ' + data.msg));  
+    });
+
+    // Show chat message
     socket.on('show chat message', function(data){
         console.log(data);
         let date = new Date(data.time);
         let date_format = date.toTimeString().split(" ");
-        if (!data.userName) {
-            $chatH.prepend($('<li>').text(date_format[0] + ' ' + data.msg));    
+        
+        // Bold the own message
+        if (data.userName === nickname) {
+            $chatH.prepend("<li>" + date_format[0] + "<span style='color: " + data.userColor + "';font-weight:bold>" + data.userName + "</span>" + ": " + data.msg + "</li>");
         } else {
-            $chatH.prepend($('<li>').text(date_format[0] + ' ' + data.userName + ' ' + data.msg));
+            $chatH.prepend("<li>" + date_format[0] + "<span style='color: " + data.userColor + "'>" + data.userName + "</span>" + ": " + data.msg + "</li>");
         }
     });
 });

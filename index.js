@@ -6,7 +6,7 @@ var io = require('socket.io')(http);
 var totalUserNumber = 0;
 var usersOnline = [];
 var usersAll = [];
-var chatLog = [];
+var chatHistory = [];
 
 app.use(express.static(__dirname));
 
@@ -24,6 +24,7 @@ io.on('connection', function(socket){
             let randomColor = "#" + Math.floor(Math.random()*16777215).toString(16); 
             newUser.userColor = randomColor;
             totalUserNumber += 1;
+            console.log("total: " + totalUserNumber);
             let nickName = "No." + totalUserNumber.toString() + " user";
             newUser.userName = nickName;
         } else {
@@ -39,6 +40,9 @@ io.on('connection', function(socket){
 
         socket.emit('send nickname', {userName: newUser.userName, userColor: newUser.userColor});
         io.emit('update online list', usersOnline);
+
+        // Send the chat history to new coming users 
+        socket.emit('send chat history', chatHistory);
     }); 
 
     // Server receives the new chat message and handle from clients
@@ -80,10 +84,10 @@ io.on('connection', function(socket){
             updateAllUserByName(preName, curName);
 
             // Update the chat history
-            
+            io.emit('update chat history', chatHistory);
 
             // Send the message
-            socket.emit('show chat message', {time: timestamp, msg: "You have changed your nickname!"});
+            socket.emit('show command message', {time: timestamp, msg: "You have changed your nickname!"});
         
         } else if (commandMessage[0] === "/nickcolor" && commandMessage.length === 2) { // Change color command
             // Invalid command 
@@ -104,19 +108,27 @@ io.on('connection', function(socket){
             updateAllUserByColor(curColor, userOnline);
 
             // Update the chat history
+            io.emit('update chat history', chatHistory);
 
-             // Send the message
-             socket.emit('show chat message', {time: timestamp, msg: "You have changed your nickname color!"});
+            // Send the message
+            socket.emit('show command message', {time: timestamp, msg: "You have changed your nickname color!"});
         } else {
             
+            chatHistory.push({time: timestamp, userName: userOnline.userName, userColor: userOnline.userColor, msg: data.msg});
             // Send the regular message
-            io.emit('show chat message', {time: timestamp, userName: userOnline.userName, msg: data.msg});
+            io.emit('show chat message', {time: timestamp, userName: userOnline.userName, userColor: userOnline.userColor, msg: data.msg});
         }
 
     });
 
+    // Disconnect the user
     socket.on('disconnect', function () {
-       console.log('user disconnected');
+        let socketId_index = findOnlineUserById(socket.id);
+        if (socketId_index !== -1) {
+            console.log("Socket id: " + socket.id + " disconnected");
+            usersOnline.splice(socketId_index, 1);
+            io.emit('update online list', usersOnline);
+        }
     });
 
 });
@@ -170,7 +182,6 @@ function findOnlineUserById(socketId) {
     }
     return -1;
 }
-
 
 http.listen(3000, function() {
     console.log('listening on *:3000');
