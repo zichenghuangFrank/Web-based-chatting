@@ -1,5 +1,5 @@
-var app = require('express')();
 var express = require('express');
+var app = require('express')();
 var http = require('http').createServer(app);
 var io = require('socket.io')(http);
 
@@ -8,24 +8,19 @@ var usersOnline = [];
 var usersAll = [];
 var chatHistory = [];
 
-app.use(express.static(__dirname));
-
-app.get('/', function(req, res) {
-   res.sendFile(__dirname + '/index.html');
-});
-
+app.use(express.static('public'));
 
 io.on('connection', function(socket){
 
     var newUser = {};
 
     socket.on('user connect', function(userName, userColor, cookieData) {
-        if(!userName) {
+        if(!usersOnline.includes(userName)) {
             let randomColor = "#" + Math.floor(Math.random()*16777215).toString(16); 
             newUser.userColor = randomColor;
             totalUserNumber += 1;
             console.log("total: " + totalUserNumber);
-            let nickName = "No." + totalUserNumber.toString() + " user";
+            let nickName = "No." + totalUserNumber.toString() + " user"; // Online user's number
             newUser.userName = nickName;
         } else {
             newUser.userColor = userColor;
@@ -33,10 +28,11 @@ io.on('connection', function(socket){
         }
         
         newUser.id = socket.id; // Get the user socket id 
-        cookieData({name: newUser.userName, color: newUser.userColor}); // Update the cookie data
+        cookieData({userName: newUser.userName, userColor: newUser.userColor}); // Update the cookie data
 
         usersOnline.push(newUser);
         usersAll.push(newUser);
+        console.log(newUser.userName + "connect");
 
         socket.emit('send nickname', {userName: newUser.userName, userColor: newUser.userColor});
         io.emit('update online list', usersOnline);
@@ -50,7 +46,8 @@ io.on('connection', function(socket){
         let timestamp = Date.now(); // Add current time stamps
         let userIndex = findOnlineUserByName(data.userName);
         let userOnline  = usersOnline[userIndex];
-        console.log(userOnline);
+        console.log(usersOnline);
+        console.log(usersAll);
 
         // Check if the command is /nick or /nickcolor 
         let commandMessage = data.msg.split(" ");
@@ -59,16 +56,19 @@ io.on('connection', function(socket){
         // Change name command
         if (commandMessage[0] === "/nick" && commandMessage.length > 1) {
 
-            let curName = commandMessage.shift();
+            commandMessage.shift();
+            let curName = commandMessage.join(" ");
+            console.log(curName);
+            
             // Empty name
-            if (curName.trim().length === 0) {
-                socket.emit('show chat message', {time: timestamp, msg: "You enter an invalid command! Please try again."});
+            if (curName.length === 0) {
+                socket.emit('show command message', {time: timestamp, msg: "You enter an invalid command! Please try again."});
                 return;
             }
 
             // Check whether the changed name is unique or not 
             if (!isUniqueName(curName)) {
-                socket.emit('show chat message', {time: timestamp, msg: "Your nickname has been taken! Please try again."});
+                socket.emit('show command message', {time: timestamp, msg: "Your nickname has been taken! Please try again."});
                 return;
             }
 
@@ -92,14 +92,14 @@ io.on('connection', function(socket){
         } else if (commandMessage[0] === "/nickcolor" && commandMessage.length === 2) { // Change color command
             // Invalid command 
             if (commandMessage[1].length !== 6 || parseInt("0x" + commandMessage[1]) > 0xFFFFFF) {
-                socket.emit('show chat message', {time: timestamp, msg: "Your change color should be like RRGGBB! Please try again."});
+                socket.emit('show command message', {time: timestamp, msg: "Your change color should be like RRGGBB! Please try again."});
                 return;
             }
             
             // Change into the new nickname color
             let curColor = "#" + commandMessage[1];
             usersOnline[userIndex].userColor = curColor;
-            socket.emit('send nickname', {userName: curName, userColor: userOnline.userColor});
+            socket.emit('send nickname', {userName: userOnline.userName, userColor: userOnline.userColor});
 
             // Update the online list
             io.emit("update online list", usersOnline);
@@ -138,9 +138,10 @@ function updateAllUserByName(preName, curName) {
     for (let i = 0; i < usersAll.length; i++) {
         if (preName === usersAll[i].userName) {
             usersAll[i].userName = curName;
-            return;
+            break;
         }
     }
+    return;
 }
 
 // Update the user's nickname color in all users
@@ -148,9 +149,10 @@ function updateAllUserByColor(curColor, name) {
     for (let i = 0; i < usersAll.length; i++) {
         if (usersAll[i].userName === name) {
             usersAll[i].userColor = curColor;
-            return;
+            break;
         }
     }
+    return;
 }
 
 // Find the index of online user name

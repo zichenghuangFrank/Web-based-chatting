@@ -1,25 +1,24 @@
  $(function () {
     var socket = io();
-    // let onlineFlag = false;
     let $chatH = $('#chat-history');
     let $usersOnline = $('#online-users');
     let $msgInput = $('#msg-send');
     var nickname = "";
 
-    var curName = $.cookie("userName");
-    var curColor = $.cookie("userColor");
+    var curName = $.cookie('userName');
+    var curColor = $.cookie('userColor');
 
     socket.on('connect', function(data) {
         socket.emit('user connect', curName, curColor, function (data) {
-            $.cookie("userName", data.name);
-            $.cookie("userColor", data.color);
+            $.cookie('userName', data.name);
+            $.cookie('userColor', data.color);
         });
     });
 
     // Assign the user in the chatting room
     socket.on('send nickname', function(data){
-        $.cookie("userName", data.userName);
-        $.cookie("userColor", data.userColor);
+        $.cookie('userName', data.userName);
+        $.cookie('userColor', data.userColor);
         nickname = data.userName;
         $('#user-name')[0].innerHTML = "You are " + "<span style='color: " + data.userColor + "'>" + data.userName + "</span>";
     });
@@ -45,9 +44,9 @@
         $chatH.empty();
         for (let i = 0; i < data.length; i++) {
             console.log(data);
-            let date = new Date(data.time);
+            let date = new Date(data[i].time);
             let date_format = date.toTimeString().split(" ");
-            $chatH.prepend("<li>" + date_format[0] + "<span style='color: " + data[i].userColor + "'>" + data[i].userName + "</span>" + ": " + data[i].msg + "</li>");
+            $chatH.prepend("<li>" + date_format[0] + " " + "<span style='color: " + data[i].userColor + "'>" + data[i].userName + "</span>" + ": " + data[i].msg + "</li>");
         }
     });
 
@@ -56,14 +55,14 @@
         $chatH.empty();
         for (let i = 0; i < data.length; i++) {
             console.log(data);
-            let date = new Date(data.time);
+            let date = new Date(data[i].time);
             let date_format = date.toTimeString().split(" ");
 
             // Bold the own message
             if (data[i].userName === nickname) {
-                $chatH.prepend("<li>" + date_format[0] + "<span style='color: " + data[i].userColor + "';font-weight:bold>" + data[i].userName + "</span>" + ": " + data[i].msg + "</li>");
+                $chatH.prepend("<li>" + date_format[0] + " " + "<span style='color: " + data[i].userColor + "'>" + data[i].userName + "</span>" + ": " + "<b>" + data[i].msg + "</b>" + "</li>");
             } else {
-                $chatH.prepend("<li>" + date_format[0] + "<span style='color: " + data[i].userColor + "'>" + data[i].userName + "</span>" + ": " + data[i].msg + "</li>");
+                $chatH.prepend("<li>" + date_format[0] + " " + "<span style='color: " + data[i].userColor + "'>" + data[i].userName + "</span>" + ": " + data[i].msg + "</li>");
             }
         }
     });
@@ -73,7 +72,7 @@
         console.log(data);
         let date = new Date(data.time);
         let date_format = date.toTimeString().split(" ");
-        $chatH.prepend($('<li>').text(date_format[0] + ' ' + data.msg));  
+        $chatH.prepend($('<li>').text(date_format[0] + " " + ' ' + data.msg));  
     });
 
     // Show chat message
@@ -84,9 +83,9 @@
         
         // Bold the own message
         if (data.userName === nickname) {
-            $chatH.prepend("<li>" + date_format[0] + "<span style='color: " + data.userColor + "';font-weight:bold>" + data.userName + "</span>" + ": " + data.msg + "</li>");
+            $chatH.prepend("<li>" + date_format[0] + " " + "<span style='color: " + data.userColor + "'>" + data.userName + "</span>" + ": " + "<b>" + data.msg + "</b>" + "</li>");
         } else {
-            $chatH.prepend("<li>" + date_format[0] + "<span style='color: " + data.userColor + "'>" + data.userName + "</span>" + ": " + data.msg + "</li>");
+            $chatH.prepend("<li>" + date_format[0] + " " + "<span style='color: " + data.userColor + "'>" + data.userName + "</span>" + ": " + data.msg + "</li>");
         }
     });
 });
