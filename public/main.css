@@ -1,0 +1,127 @@
+body {
+    background-color: #72b8ff;
+}
+.title {
+    font-size: 36px;
+    margin-left: 40%;
+    color: #ffffff;
+}
+#external {
+    margin-top: 5%;
+    display: flex;
+    flex-flow: column wrap;
+    width: 100%;
+}
+.row {
+    display: flex;
+    flex-flow: row wrap;
+    width: 100%;
+    justify-content: space-between;
+    position: fixed;
+    top: 25px;
+    bottom: 60px;
+    padding: 2%;
+    margin-bottom: 12px;
+}
+.chat-header {
+    background-color: dodgerblue;
+    border: 2px solid #cccccc;
+    width: 95%;
+    height: 15%;
+    border-bottom: none;
+    display: inline-block;
+}
+#current-user {
+    font-size: 30px;
+    margin-top: 3%;
+    margin-left: 10%;
+    display: inline-block;
+    color: #ffffff;
+}
+#onlineUsers {
+    font-size: 30px;
+    margin-left: 50%;
+    display: inline-block;
+    color: #ffffff;
+}
+.msg-container {
+    width: 47.5%;
+    padding-top: 2%;
+    height: 80%;
+    display: inline-block;
+}
+#chat-history {
+    bottom: 10px;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    border-radius: 15px 0 0 15px;
+    border: 2px solid #cccccc;
+    background-color: #7ca1b6;
+    vertical-align: bottom;
+}
+#chat-history li {
+    padding: 5px 10px;
+}
+.user-container {
+    width: 47.5%;
+    padding-top: 2%;
+    height: 80%;
+    margin-right: 5%;
+    display: inline-block;
+}
+#onlineUsers {
+    font-size: 30px;
+    color: #ffffff;
+}
+#online-users {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    border-radius: 0 15px 15px 0;
+    border: 2px solid #cccccc;
+    background-color: #7ca1b6;
+}
+#online-users li {
+    padding: 5px 10px;
+}
+ul {
+    display: flex;
+    flex-direction: column-reverse;
+    overflow: hidden;
+    overflow-y: scroll;
+}
+li {
+    flex: 0 0 auto;
+    color: #ffffff;
+}
+form {
+    margin-left: 2%;
+    background: dodgerblue;
+    padding: 10px;
+    position: fixed;
+    bottom: 2%;
+    width: 94%;
+}
+form input {
+    border: 0;
+    padding: 10px;
+    width: 80%;
+    margin-right: .5%;
+    border-radius: 10px;
+    font-size: 18px;
+}
+form button {
+    margin-left: 2.2%;
+    width: 15%;
+    background: lightblue;
+    padding: 10px;
+    border-radius: 15px;
+    border-left: 4px solid #6666ff;
+    border-right: 4px solid #cccccc;
+    border-top: 4px solid #cccccc;
+    border-bottom: 4px solid #6666ff;
+    font-size: 18px;
+}
